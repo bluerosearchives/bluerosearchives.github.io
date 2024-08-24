@@ -6,52 +6,189 @@
     <title>Blue Rose Will Return</title>
     <link rel="icon" type="image/x-icon" href="BLUE ROSE logo (ICO).ico">
     <style>
-        body {
-            background-color: black;
-            color: #0180eb;
-            font-family: Times New Roman, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        body, html {
             margin: 0;
-            text-align: center; /* Center text alignment for all screen sizes */
-        }
-        
-        h1 {
-            margin-bottom: 20px;
-            /* justify-content: center; Remove this line */
-        }
-
-        .icon-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Times New Roman', serif;
         }
 
-        .icon {
-            margin: 10px;
-            transition: color 0.3s ease;
-            color: white;
-            text-decoration: none;
-            font-size: 1.25em; /* Adjust this value to change the font size */
-        }
-
-        .icon:hover {
-            color: #0180eb;
-        }
-
-        .icon:visited {
-            color: white;
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: black;
         }
     </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </head>
 <body>
-    <h1>Blue Rose Will Return</h1>
-    <div class="icon-container">
-        <a href="https://www.youtube.com/@bluerosearchives" class="icon">YouTube</a>
-        <a href="https://open.spotify.com/artist/101cXLF4t8cx98eHXTQa3d?si=Tkr4zcDMQLC9y6oAJGDcMw" class="icon">Spotify</a>
-    </div>
+    <canvas id="renderCanvas"></canvas> <!-- Babylon.js Canvas -->
+
+    <script>
+        const canvas = document.getElementById('renderCanvas');
+        const engine = new BABYLON.Engine(canvas, true);
+
+        let modelMesh, camera, advancedTexture;
+        let rotating = true;
+        let textBlock;
+        let isAnimating = false;
+
+        // Variables to store initial camera settings
+        let initialCameraTarget, initialCameraAlpha, initialCameraBeta, initialCameraRadius;
+
+        function rotateCamera() {
+            camera.alpha += 0.01;
+        }
+
+        const createScene = () => {
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3(0, 0, 0); // Black background
+
+            camera = new BABYLON.ArcRotateCamera("Camera", 
+                0, 
+                BABYLON.Tools.ToRadians(-90), 
+                10, 
+                BABYLON.Vector3.Zero(), 
+                scene);
+
+            // Save initial camera settings
+            initialCameraTarget = camera.target.clone();
+            initialCameraAlpha = camera.alpha;
+            initialCameraBeta = camera.beta;
+            initialCameraRadius = camera.radius;
+
+            const hemisphericLight = new BABYLON.HemisphericLight("globalLight", new BABYLON.Vector3(0, 1, 0), scene);
+            hemisphericLight.diffuse = new BABYLON.Color3(0, 0.38431372549, 1);
+            hemisphericLight.intensity = 2.0;
+
+            BABYLON.SceneLoader.ImportMesh("", "./models/", "BlueFace.glb", scene, (meshes) => {
+                modelMesh = meshes[0];
+                // Continuous rotation logic
+                scene.registerBeforeRender(() => {
+                    if (rotating && modelMesh) {
+                        modelMesh.rotation.y += 0.01;
+                    }
+                });
+            });
+
+            advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
+
+            // Create a text block
+            textBlock = new BABYLON.GUI.TextBlock();
+            textBlock.text = "bluerosesarentreal";
+            textBlock.color = "white";
+            textBlock.fontFamily = "Times New Roman";
+            textBlock.fontSize = 24;
+
+            const rectButton = new BABYLON.GUI.Rectangle();
+            rectButton.width = "500px";
+            rectButton.height = "40px";
+            rectButton.cornerRadius = 20;
+            rectButton.color = "white";
+            rectButton.thickness = 0;
+            rectButton.background = "rgba(0, 0, 0, 0)";
+            rectButton.left = "0px";
+            rectButton.top = "-25px";
+
+            advancedTexture.addControl(rectButton);
+            rectButton.addControl(textBlock);
+
+            rectButton.onPointerEnterObservable.add(() => {
+                textBlock.color = "#0180eb";
+            });
+
+            rectButton.onPointerOutObservable.add(() => {
+                textBlock.color = "white";
+            });
+
+            rectButton.onPointerUpObservable.add(() => {
+                if (textBlock.text === "bluerosesarentreal") {
+                    textBlock.text = "blue roses are real";
+                    camera.attachControl(canvas, false); 
+                    scene.unregisterBeforeRender(rotateCamera);
+                    if (!isAnimating) {
+                        scene.registerBeforeRender(panCamera);
+                    }
+                } else {
+                    textBlock.text = "bluerosesarentreal";
+                    camera.detachControl(canvas);
+                    scene.registerBeforeRender(rotateCamera);
+                    // Reset camera to initial settings
+                    camera.target = initialCameraTarget.clone();
+                    camera.alpha = initialCameraAlpha;
+                    camera.beta = initialCameraBeta;
+                    camera.radius = initialCameraRadius;
+                }
+            });
+
+            // Create additional buttons (YouTube and Spotify)
+            const createButton = (text, url, positionX, positionY, width) => {
+                const button = new BABYLON.GUI.Rectangle();
+                button.width = width;
+                button.height = "40px";
+                button.cornerRadius = 20;
+                button.color = "white";
+                button.thickness = 0;
+                button.background = "rgba(0, 0, 0, 0)";
+                button.left = positionX;
+                button.top = positionY;
+
+                advancedTexture.addControl(button);
+
+                const buttonText = new BABYLON.GUI.TextBlock();
+                buttonText.text = text;
+                buttonText.color = "white";
+                buttonText.fontFamily = "Times New Roman";
+                buttonText.fontSize = 24;
+
+                button.addControl(buttonText);
+
+                button.onPointerEnterObservable.add(() => {
+                    buttonText.color = "#0180eb";
+                });
+
+                button.onPointerOutObservable.add(() => {
+                    buttonText.color = "white";
+                });
+
+                button.onPointerUpObservable.add(() => {
+                    window.open(url, "_blank");
+                });
+
+                return button;
+            };
+
+            createButton("youtube", "https://www.youtube.com/@bluerosearchives", "-47px", "10px", "150px");
+            createButton("spotify", "https://open.spotify.com/artist/101cXLF4t8cx98eHXTQa3d?si=LMTo4SDFTUu7LBq-EGjVGA", "53px", "10px", "150px");
+            scene.registerBeforeRender(rotateCamera);
+
+            return scene;
+        };
+
+        function panCamera() {
+            camera.beta += 0.03;
+            if(camera.beta >= 1.75) {
+                scene.unregisterBeforeRender(panCamera);
+            }
+        }
+
+        const scene = createScene();
+
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+
+        window.addEventListener('resize', () => {
+            engine.resize();
+        });
+    </script>
 </body>
 </html>
