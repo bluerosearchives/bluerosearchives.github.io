@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Rose Will Return</title>
+    <link rel="icon" type="image/x-icon" href="BLUE ROSE logo (ICO).ico">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Times New Roman', serif;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: black;
+        }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas> <!-- Babylon.js Canvas -->
+
+    <script>
+        const canvas = document.getElementById('renderCanvas');
+        const engine = new BABYLON.Engine(canvas, true);
+
+        let modelMesh, camera, advancedTexture;
+        let rotating = true;
+        let textBlock;
+        let isAnimating = false;
+
+        // Variables to store initial camera settings
+        let initialCameraTarget, initialCameraAlpha, initialCameraBeta, initialCameraRadius;
+
+        function rotateCamera() {
+            camera.alpha += 0.01;
+        }
+
+        const createScene = () => {
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3(0, 0, 0); // Black background
+
+            camera = new BABYLON.ArcRotateCamera("Camera", 
+                0, 
+                BABYLON.Tools.ToRadians(-90), 
+                10, 
+                BABYLON.Vector3.Zero(), 
+                scene);
+
+            // Save initial camera settings
+            initialCameraTarget = camera.target.clone();
+            initialCameraAlpha = camera.alpha;
+            initialCameraBeta = camera.beta;
+            initialCameraRadius = camera.radius;
+
+            const hemisphericLight = new BABYLON.HemisphericLight("globalLight", new BABYLON.Vector3(0, 1, 0), scene);
+            hemisphericLight.diffuse = new BABYLON.Color3(0, 0.38431372549, 1);
+            hemisphericLight.intensity = 2.0;
+
+            BABYLON.SceneLoader.ImportMesh("", "./models/", "BlueFace.glb", scene, (meshes) => {
+                modelMesh = meshes[0];
+                // Continuous rotation logic
+                scene.registerBeforeRender(() => {
+                    if (rotating && modelMesh) {
+                        modelMesh.rotation.y += 0.01;
+                    }
+                });
+            });
+
+            advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
+
+            // Create a text block
+            textBlock = new BABYLON.GUI.TextBlock();
+            textBlock.text = "Archives catalog under construction.";
+            textBlock.color = "white";
+            textBlock.fontFamily = "Times New Roman";
+            textBlock.fontSize = 24;
+
+            const rectButton = new BABYLON.GUI.Rectangle();
+            rectButton.width = "500px";
+            rectButton.height = "100px";
+            rectButton.cornerRadius = 20;
+            rectButton.color = "white";
+            rectButton.thickness = 0;
+            rectButton.background = "rgba(0, 0, 0, 0)";
+            rectButton.left = "0px";
+            rectButton.top = "-25px";
+
+            advancedTexture.addControl(rectButton);
+            rectButton.addControl(textBlock);
+
+            // Create additional buttons (YouTube and Spotify)
+            const createButton = (text, url, positionX, positionY, width) => {
+                const button = new BABYLON.GUI.Rectangle();
+                button.width = width;
+                button.height = "40px";
+                button.cornerRadius = 20;
+                button.color = "white";
+                button.thickness = 0;
+                button.background = "rgba(0, 0, 0, 0)";
+                button.left = positionX;
+                button.top = positionY;
+
+                advancedTexture.addControl(button);
+
+                const buttonText = new BABYLON.GUI.TextBlock();
+                buttonText.text = text;
+                buttonText.color = "white";
+                buttonText.fontFamily = "Times New Roman";
+                buttonText.fontSize = 24;
+
+                button.addControl(buttonText);
+
+                button.onPointerEnterObservable.add(() => {
+                    buttonText.color = "#0180eb";
+                });
+
+                button.onPointerOutObservable.add(() => {
+                    buttonText.color = "white";
+                });
+                button.onPointerUpObservable.add(() => {
+                    window.location.href = url; // Change this line to navigate within the same window
+                });
+
+                return button;
+            };
+
+            createButton("home", "/index.html", "0px", "45px", "150px");
+
+            scene.registerBeforeRender(rotateCamera);
+
+            return scene;
+        };
+
+        function panCamera() {
+            camera.beta += 0.03;
+            if(camera.beta >= 1.75) {
+                scene.unregisterBeforeRender(panCamera);
+            }
+        }
+        function getDayOfMonthFromDayOfYear(dayOfYear) {
+            const a = 17;
+            const b = 23;
+            const prime = 31;
+            
+            // A hash-like function to spread out the values more unpredictably
+            const hashValue = ((a * dayOfYear + b) % prime) + 1;
+            
+            return (hashValue % 30) + 1;
+        }
+
+        const scene = createScene();
+
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+
+        window.addEventListener('resize', () => {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
