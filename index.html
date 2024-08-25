@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue Rose</title>
+    <title>Blue Rose Will Return</title>
     <link rel="icon" type="image/x-icon" href="BLUE ROSE logo (ICO).ico">
     <style>
         body, html {
@@ -96,7 +96,7 @@
             rectButton.thickness = 0;
             rectButton.background = "rgba(0, 0, 0, 0)";
             rectButton.left = "0px";
-            rectButton.top = "-25px";
+            rectButton.top = "-30px";
 
             advancedTexture.addControl(rectButton);
             rectButton.addControl(textBlock);
@@ -160,14 +160,17 @@
                 });
 
                 button.onPointerUpObservable.add(() => {
-                    window.open(url, "_blank");
+                    window.location.href = url; // Change this line to navigate within the same window
                 });
 
                 return button;
             };
 
-            createButton("youtube", "https://www.youtube.com/@bluerosesarentreal", "-47px", "10px", "150px");
-            createButton("spotify", "https://open.spotify.com/artist/101cXLF4t8cx98eHXTQa3d?si=LMTo4SDFTUu7LBq-EGjVGA", "53px", "10px", "150px");
+            createButton("youtube", "https://www.youtube.com/@bluerosearchives", "-47px", "45px", "150px");
+            createButton("spotify", "https://open.spotify.com/artist/101cXLF4t8cx98eHXTQa3d?si=LMTo4SDFTUu7LBq-EGjVGA", "53px", "45px", "150px");
+            createButton("about", "/about.html", "-61px", "10px", "150px");
+            createButton("archives", "/archives.html", "47px", "10px", "150px");
+
             scene.registerBeforeRender(rotateCamera);
 
             return scene;
