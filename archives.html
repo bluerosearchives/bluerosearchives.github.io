@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue Rose Will Return</title>
+    <title>Blue Rose</title>
     <link rel="icon" type="image/x-icon" href="BLUE ROSE logo (ICO).ico">
     <style>
         body, html {
@@ -68,16 +68,51 @@
             const hemisphericLight = new BABYLON.HemisphericLight("globalLight", new BABYLON.Vector3(0, 1, 0), scene);
             hemisphericLight.diffuse = new BABYLON.Color3(0, 0.38431372549, 1);
             hemisphericLight.intensity = 2.0;
+            const particleSystem = new BABYLON.ParticleSystem("particles", 5000, scene);
+            particleSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs.com/assets/Flare.png", scene);
 
-            BABYLON.SceneLoader.ImportMesh("", "./models/", "BlueFace.glb", scene, (meshes) => {
-                modelMesh = meshes[0];
-                // Continuous rotation logic
-                scene.registerBeforeRender(() => {
-                    if (rotating && modelMesh) {
-                        modelMesh.rotation.y += 0.01;
-                    }
-                });
-            });
+            // Where the particles come from
+            particleSystem.emitter = new BABYLON.Vector3(0, 0, 0); // Position of the emitter
+            particleSystem.minEmitBox = new BABYLON.Vector3(-1, 1, -1); // Starting point
+            particleSystem.maxEmitBox = new BABYLON.Vector3(1, 1, 1); // Ending point
+
+            // Colors of all particles
+            particleSystem.color1 = new BABYLON.Color4(0, 0.5, 1, 1); // Light blue
+            particleSystem.color2 = new BABYLON.Color4(1, 1, 1, 1); // White
+            particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0); // Fade out
+
+            // Size of each particle (random between...)
+            particleSystem.minSize = 0.01;
+            particleSystem.maxSize = 0.05;
+
+            // Life time of each particle (random between...)
+            particleSystem.minLifeTime = 3;
+            particleSystem.maxLifeTime = 6; // Reduced for quicker recycling
+
+            // Emission rate
+            particleSystem.emitRate = 1000;
+
+            // Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
+            particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+
+            // Set the gravity of all particles
+            particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+            // Direction of each particle after it has been emitted
+            particleSystem.direction1 = new BABYLON.Vector3(-1, 1, 1);
+            particleSystem.direction2 = new BABYLON.Vector3(1, 1, -1);
+
+            // Angular speed, in radians
+            particleSystem.minAngularSpeed = 0;
+            particleSystem.maxAngularSpeed = Math.PI;
+
+            // Speed of each particle
+            particleSystem.minEmitPower = 1;
+            particleSystem.maxEmitPower = 3;
+            particleSystem.updateSpeed = 0.005;
+
+            // Start the particle system
+            particleSystem.start();
 
             advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
 
