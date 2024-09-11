@@ -159,12 +159,16 @@
             rectButton.onPointerUpObservable.add(() => {
                 if (textBlock.text === "bluerosesarentreal") {
                     textBlock.text = "blue roses are real";
+                    var doorSound = new BABYLON.Sound("headclick", "sounds/headclick.mp3", scene, null, { loop: false, autoplay: true });
+                    doorSound.play();
                     camera.attachControl(canvas, false); 
                     scene.unregisterBeforeRender(rotateCamera);
                     if (!isAnimating) {
                         scene.registerBeforeRender(panCamera);
                     }
                 } else {
+                    var doorSound = new BABYLON.Sound("headclick", "sounds/headputback.mp3", scene, null, { loop: false, autoplay: true });
+                    doorSound.play();
                     textBlock.text = "bluerosesarentreal";
                     camera.detachControl(canvas);
                     scene.registerBeforeRender(rotateCamera);

@@ -146,15 +146,23 @@
             createButton("home", "/index.html", "0px", "45px", "150px");
 
             // Initialize the image and add the toggle functionality
-            let doorImage = new BABYLON.GUI.Image("backgroundImage", "models/closeddoor.png"); // Default image is closed door
-            doorImage.width = "200px";  // Set to a fixed width
-            doorImage.height = "200px"; // Set to a fixed height
+            let doorImage = new BABYLON.GUI.Image("backgroundImage", "models/rose.png");
+
+            // Use percentage-based width and height to fill the space
+            doorImage.width = "20%";  // Adjust percentage based on your preference
+            doorImage.height = "20%"; 
+
+            // Maintain aspect ratio
+            doorImage.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM;
+
+            // Center the image
             doorImage.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
             doorImage.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
             doorImage.top = "-120px";
-            advancedTexture.addControl(doorImage);
 
+            advancedTexture.addControl(doorImage);
             advancedTexture.addControl(rectButton);
+
             rectButton.addControl(textRectangle);
 
             //scene.registerBeforeRender(rotateCamera);
