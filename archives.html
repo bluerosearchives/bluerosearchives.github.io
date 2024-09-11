@@ -68,60 +68,27 @@
             const hemisphericLight = new BABYLON.HemisphericLight("globalLight", new BABYLON.Vector3(0, 1, 0), scene);
             hemisphericLight.diffuse = new BABYLON.Color3(0, 0.38431372549, 1);
             hemisphericLight.intensity = 2.0;
-            const particleSystem = new BABYLON.ParticleSystem("particles", 5000, scene);
-            particleSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs.com/assets/Flare.png", scene);
-
-            // Where the particles come from
-            particleSystem.emitter = new BABYLON.Vector3(0, 0, 0); // Position of the emitter
-            particleSystem.minEmitBox = new BABYLON.Vector3(-1, 1, -1); // Starting point
-            particleSystem.maxEmitBox = new BABYLON.Vector3(1, 1, 1); // Ending point
-
-            // Colors of all particles
-            particleSystem.color1 = new BABYLON.Color4(0, 0.5, 1, 1); // Light blue
-            particleSystem.color2 = new BABYLON.Color4(1, 1, 1, 1); // White
-            particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0); // Fade out
-
-            // Size of each particle (random between...)
-            particleSystem.minSize = 0.01;
-            particleSystem.maxSize = 0.05;
-
-            // Life time of each particle (random between...)
-            particleSystem.minLifeTime = 3;
-            particleSystem.maxLifeTime = 6; // Reduced for quicker recycling
-
-            // Emission rate
-            particleSystem.emitRate = 1000;
-
-            // Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
-            particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
-
-            // Set the gravity of all particles
-            particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
-
-            // Direction of each particle after it has been emitted
-            particleSystem.direction1 = new BABYLON.Vector3(-1, 1, 1);
-            particleSystem.direction2 = new BABYLON.Vector3(1, 1, -1);
-
-            // Angular speed, in radians
-            particleSystem.minAngularSpeed = 0;
-            particleSystem.maxAngularSpeed = Math.PI;
-
-            // Speed of each particle
-            particleSystem.minEmitPower = 1;
-            particleSystem.maxEmitPower = 3;
-            particleSystem.updateSpeed = 0.005;
-
-            // Start the particle system
-            particleSystem.start();
 
             advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
 
-            // Create a text block
             textBlock = new BABYLON.GUI.TextBlock();
-            textBlock.text = "Archives catalog under construction.";
+            textBlock.text = "archives catalog under construction";
             textBlock.color = "white";
             textBlock.fontFamily = "Times New Roman";
             textBlock.fontSize = 24;
+
+            const textRectangle = new BABYLON.GUI.Rectangle();
+            textRectangle.width = "500px";
+            textRectangle.height = "25px";
+            textRectangle.cornerRadius = 20;
+            textRectangle.color = "white";
+            textRectangle.thickness = 0;
+            textRectangle.background = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black background
+            textRectangle.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            textRectangle.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            textRectangle.top = "60px";
+
+            textRectangle.addControl(textBlock);
 
             const rectButton = new BABYLON.GUI.Rectangle();
             rectButton.width = "500px";
@@ -133,10 +100,6 @@
             rectButton.left = "0px";
             rectButton.top = "-25px";
 
-            advancedTexture.addControl(rectButton);
-            rectButton.addControl(textBlock);
-
-            // Create additional buttons (YouTube and Spotify)
             const createButton = (text, url, positionX, positionY, width) => {
                 const button = new BABYLON.GUI.Rectangle();
                 button.width = width;
@@ -156,6 +119,12 @@
                 buttonText.fontFamily = "Times New Roman";
                 buttonText.fontSize = 24;
 
+                // Add a more pronounced shadow to the text
+                buttonText.shadowOffsetX = 4;   // Increased horizontal offset for the shadow
+                buttonText.shadowOffsetY = 4;   // Increased vertical offset for the shadow
+                buttonText.shadowColor = "black"; // Shadow color
+                buttonText.shadowBlur = 8; // Add blur to soften the shadow
+
                 button.addControl(buttonText);
 
                 button.onPointerEnterObservable.add(() => {
@@ -165,6 +134,7 @@
                 button.onPointerOutObservable.add(() => {
                     buttonText.color = "white";
                 });
+
                 button.onPointerUpObservable.add(() => {
                     window.location.href = url; // Change this line to navigate within the same window
                 });
@@ -172,9 +142,38 @@
                 return button;
             };
 
+
             createButton("home", "/index.html", "0px", "45px", "150px");
 
-            scene.registerBeforeRender(rotateCamera);
+            // Initialize the image and add the toggle functionality
+            let doorImage = new BABYLON.GUI.Image("backgroundImage", "models/closeddoor.png"); // Default image is closed door
+            doorImage.width = "200px";  // Set to a fixed width
+            doorImage.height = "200px"; // Set to a fixed height
+            doorImage.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            doorImage.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+            doorImage.top = "-120px";
+            advancedTexture.addControl(doorImage);
+
+            let isClosed = true; // Track door state (closed or open)
+
+            doorImage.onPointerUpObservable.add(() => {
+                // Toggle image between open and closed
+                if (isClosed) {
+                    doorImage.source = "models/opendoor.png"; // Switch to open door
+                    var doorSound = new BABYLON.Sound("openSound", "sounds/opendoor.mp3", scene, null, { loop: false, autoplay: true });
+                    doorSound.play();
+                } else {
+                    doorImage.source = "models/closeddoor.png"; // Switch back to closed door
+                    var doorSound = new BABYLON.Sound("openSound", "sounds/closedoor.mp3", scene, null, { loop: false, autoplay: true });
+                    doorSound.play();
+                }
+                isClosed = !isClosed; // Update the state
+            });
+
+            advancedTexture.addControl(rectButton);
+            rectButton.addControl(textRectangle);
+
+            //scene.registerBeforeRender(rotateCamera);
 
             return scene;
         };
@@ -184,16 +183,6 @@
             if(camera.beta >= 1.75) {
                 scene.unregisterBeforeRender(panCamera);
             }
-        }
-        function getDayOfMonthFromDayOfYear(dayOfYear) {
-            const a = 17;
-            const b = 23;
-            const prime = 31;
-            
-            // A hash-like function to spread out the values more unpredictably
-            const hashValue = ((a * dayOfYear + b) % prime) + 1;
-            
-            return (hashValue % 30) + 1;
         }
 
         const scene = createScene();
