@@ -71,59 +71,24 @@
 
             advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
 
-            // Create a text block
             textBlock = new BABYLON.GUI.TextBlock();
-            textBlock.text = "Blue Rose is a multimedia art collective\n by Aaron Post and Logan Williams.";
+            textBlock.text = "blue rose is a multimedia art collective";
             textBlock.color = "white";
             textBlock.fontFamily = "Times New Roman";
             textBlock.fontSize = 24;
 
-            const particleSystem = new BABYLON.ParticleSystem("particles", 5000, scene);
-            particleSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs.com/assets/Flare.png", scene);
+            const textRectangle = new BABYLON.GUI.Rectangle();
+            textRectangle.width = "500px";
+            textRectangle.height = "25px";
+            textRectangle.cornerRadius = 20;
+            textRectangle.color = "white";
+            textRectangle.thickness = 0;
+            textRectangle.background = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black background
+            textRectangle.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            textRectangle.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            textRectangle.top = "60px";
 
-            // Where the particles come from
-            particleSystem.emitter = new BABYLON.Vector3(0, 0, 0); // Position of the emitter
-            particleSystem.minEmitBox = new BABYLON.Vector3(-1, 1, -1); // Starting point
-            particleSystem.maxEmitBox = new BABYLON.Vector3(1, 1, 1); // Ending point
-
-            // Colors of all particles
-            particleSystem.color1 = new BABYLON.Color4(0, 0.5, 1, 1); // Light blue
-            particleSystem.color2 = new BABYLON.Color4(1, 1, 1, 1); // White
-            particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0); // Fade out
-
-            // Size of each particle (random between...)
-            particleSystem.minSize = 0.01;
-            particleSystem.maxSize = 0.05;
-
-            // Life time of each particle (random between...)
-            particleSystem.minLifeTime = 3;
-            particleSystem.maxLifeTime = 6; // Reduced for quicker recycling
-
-            // Emission rate
-            particleSystem.emitRate = 1000;
-
-            // Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
-            particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
-
-            // Set the gravity of all particles
-            particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
-
-            // Direction of each particle after it has been emitted
-            particleSystem.direction1 = new BABYLON.Vector3(-1, 1, 1);
-            particleSystem.direction2 = new BABYLON.Vector3(1, 1, -1);
-
-            // Angular speed, in radians
-            particleSystem.minAngularSpeed = 0;
-            particleSystem.maxAngularSpeed = Math.PI;
-
-            // Speed of each particle
-            particleSystem.minEmitPower = 1;
-            particleSystem.maxEmitPower = 3;
-            particleSystem.updateSpeed = 0.005;
-
-            // Start the particle system
-            particleSystem.start();
-
+            textRectangle.addControl(textBlock);
 
             const rectButton = new BABYLON.GUI.Rectangle();
             rectButton.width = "500px";
@@ -135,10 +100,6 @@
             rectButton.left = "0px";
             rectButton.top = "-25px";
 
-            advancedTexture.addControl(rectButton);
-            rectButton.addControl(textBlock);
-
-            // Create additional buttons (YouTube and Spotify)
             const createButton = (text, url, positionX, positionY, width) => {
                 const button = new BABYLON.GUI.Rectangle();
                 button.width = width;
@@ -158,6 +119,12 @@
                 buttonText.fontFamily = "Times New Roman";
                 buttonText.fontSize = 24;
 
+                // Add a more pronounced shadow to the text
+                buttonText.shadowOffsetX = 4;   // Increased horizontal offset for the shadow
+                buttonText.shadowOffsetY = 4;   // Increased vertical offset for the shadow
+                buttonText.shadowColor = "black"; // Shadow color
+                buttonText.shadowBlur = 8; // Add blur to soften the shadow
+
                 button.addControl(buttonText);
 
                 button.onPointerEnterObservable.add(() => {
@@ -167,6 +134,7 @@
                 button.onPointerOutObservable.add(() => {
                     buttonText.color = "white";
                 });
+
                 button.onPointerUpObservable.add(() => {
                     window.location.href = url; // Change this line to navigate within the same window
                 });
@@ -174,9 +142,21 @@
                 return button;
             };
 
+
             createButton("home", "/index.html", "0px", "45px", "150px");
 
-            scene.registerBeforeRender(rotateCamera);
+            const image = new BABYLON.GUI.Image("backgroundImage", "models/doorflipped.png"); // Replace with your image URL
+            image.width = "200px";  // Set to a fixed width
+            image.height = "200px"; // Set to a fixed height
+            image.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            image.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+            image.top = "-120px";
+            advancedTexture.addControl(image);
+
+            advancedTexture.addControl(rectButton);
+            rectButton.addControl(textRectangle);
+
+            //scene.registerBeforeRender(rotateCamera);
 
             return scene;
         };
