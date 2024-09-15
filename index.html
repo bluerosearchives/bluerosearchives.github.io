@@ -45,7 +45,10 @@
         let initialCameraTarget, initialCameraAlpha, initialCameraBeta, initialCameraRadius;
 
         function rotateCamera() {
-            camera.alpha += 0.01;
+            const deltaTime = engine.getDeltaTime(); // Time since last frame in milliseconds
+            const rotationSpeed = 0.001; // Adjust this value for the desired rotation speed
+
+            camera.alpha += rotationSpeed * deltaTime;
         }
 
         const createScene = () => {
